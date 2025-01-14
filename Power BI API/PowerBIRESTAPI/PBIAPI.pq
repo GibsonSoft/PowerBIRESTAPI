@@ -418,7 +418,7 @@ ExecuteQuery =
                             let
                                 initSource = apiCall[results]?{0}?[tables]?{0}?[rows]?,
                                 
-                                namesOfColumns = List.Distinct(Record.FieldNames(Record.Combine(initSource))),
+                                namesOfColumns = List.Buffer(List.Distinct(Record.FieldNames(Record.Combine(initSource)))),
                                 correctedColumnsNames =
                                     List.Transform(
                                         namesOfColumns,
