@@ -417,17 +417,17 @@ ExecuteQuery =
                         output =
                             let
                                 initSource = apiCall[results]?{0}?[tables]?{0}?[rows]?,
-                                namesOfColumns = List.Buffer(Record.FieldNames(initSource{0})),
+                                
+                                namesOfColumns = List.Distinct(Record.FieldNames(Record.Combine(initSource))),
                                 correctedColumnsNames =
                                     List.Transform(
                                         namesOfColumns,
-                                        each Text.BetweenDelimiters(_, "[", "]")
+                                        each {_, Text.BetweenDelimiters(_, "[", "]")}
                                     ),
-                                tableCreator = Table.FromList(
-                                        initSource,
-                                        Record.FieldValues,
-                                        correctedColumnsNames
-                                    )
+                                    
+                                padMissingColumns = List.Transform(initSource, each Record.SelectFields(_, namesOfColumns, MissingField.UseNull)),
+                                renameColumns = List.Transform(padMissingColumns, each Record.RenameFields(_, correctedColumnsNames)),
+                                tableCreator = Table.FromRecords(renameColumns)
                             in
                                 tableCreator
                     in
